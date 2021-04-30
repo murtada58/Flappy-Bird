@@ -8,11 +8,16 @@ canvas.height = canvas.offsetHeight;
 const GAME_WIDTH =  960; // should be equal to or less than canvas width in pixels
 const GAME_HEIGHT =  600; // should be equal to or less than canvas height in pixels
 const PIPE_WIDTH = 100; // width of the pipes in pixels
-const PIPE_SPEED = 100; // the speed that pipes move from right to left at pixels per second
-
+const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixels per second
+const MIN_PIPE_GAP = 100;
+const MAX_PIPE_GAP = 150;
+const MIN_INTERVAL = 1;
+const MAX_INTERVAL = 1.5;
 
 let paused = true; // controls wether the game is paused or not
-let timer = 0; // keeps track of time
+let timer = 0; // keeps track of time in seconds
+let interval = 0; // time between column spawns in seconds
+let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
 
 // intial setup
@@ -36,6 +41,14 @@ function update(delta_time)
             pipes[i].left_x -= delta_time * PIPE_SPEED;
         }
     }
+
+    if (timer >= last_spwan_time + interval)
+    {
+        last_spwan_time = timer;
+        interval = random(MIN_INTERVAL, MAX_INTERVAL);
+        let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
+        pipes.push(new Pipe(GAME_WIDTH, randomInt(canvas.height * 0.1, (canvas.height * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
+    }
 }
 
 // draw update
@@ -44,19 +57,17 @@ function draw(time_stamp)
 {
     let delta_time = (time_stamp - old_times_stamp) / 1000; // time between frames in seconds
     old_times_stamp = time_stamp;
-    if (!isNaN(delta_time))
+
+    if (!paused && !isNaN(delta_time))
     {
         timer += delta_time;
-    }
-
-    if (!paused)
-    {
         update(delta_time);
     }
 
     // draw background
     colorRect(0, 0, canvas.width ,canvas.height, "#000000");
 
+    // draw pipes
     for (let i = 0; i < pipes.length; i++)
     {
         draw_pipe(pipes[i], GAME_HEIGHT, "#FFFFFF");

@@ -26,8 +26,6 @@ function setup()
     document.addEventListener("keydown", keyPressed);
     document.addEventListener("keyup", keyUp);
 
-    pipes.push(new Pipe(100, 100, 100, 100));
-    pipes.push(new Pipe(400, 200, 100, 100));
     draw();
 }
 
@@ -39,6 +37,11 @@ function update(delta_time)
         if (!isNaN(delta_time)) // move pipe (checking delta_time to avoid errors)
         {
             pipes[i].left_x -= delta_time * PIPE_SPEED;
+        }
+
+        if (pipes[i].left_x <= -PIPE_WIDTH)
+        {
+            pipes.shift();
         }
     }
 

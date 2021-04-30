@@ -7,7 +7,7 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 // constants
-const GAME_WIDTH =  960; // should be equal to or less than canvas width in pixels
+const GAME_WIDTH =  700; // should be equal to or less than canvas width in pixels
 const GAME_HEIGHT =  500; // should be equal to or less than canvas height in pixels
 const PIPE_WIDTH = 100; // width of the pipes in pixels
 const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixels per second
@@ -43,6 +43,7 @@ let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
 let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0, sprite);
 let points = 0;
+let high_score = 0;
 let ai_mode = 0; // 0 is manual
 
 // intial setup
@@ -85,7 +86,8 @@ function update(delta_time)
         if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
         {
             points++;
-            console.log(points);
+            high_score = Math.max(high_score, points);
+            // console.log(points);
         }
 
         // check for pipe collisions
@@ -143,7 +145,7 @@ function draw(time_stamp)
     }
 
     // draw background
-    //colorRect(0, 0, GAME_WIDTH , GAME_HEIGHT, "#4287f5");
+    //color_rect(0, 0, GAME_WIDTH , GAME_HEIGHT, "#4287f5");
     draw_background(background, background_pos, GAME_WIDTH, GAME_HEIGHT);
 
     // draw bird
@@ -157,6 +159,9 @@ function draw(time_stamp)
 
     // draw ground
     draw_ground(ground, ground_pos, GAME_HEIGHT, GAME_WIDTH, canvas.height);
+
+    // draw stats
+    draw_stats(GAME_WIDTH, canvas.width, canvas.height, timer, points, high_score);
 
     window.requestAnimationFrame(draw);
 }

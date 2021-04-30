@@ -5,9 +5,12 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 // constants
-GAME_WIDTH =  960; // should be equal to or less than canvas width
-GAME_HEIGHT =  540; // should be equal to or less than canvas height
+const GAME_WIDTH =  960; // should be equal to or less than canvas width
+const GAME_HEIGHT =  600; // should be equal to or less than canvas height
+const PIPE_WIDTH = 100; // width of the pipes
 
+let paused = true;
+let timer = 0;
 
 // intial setup
 function setup()
@@ -19,7 +22,7 @@ function setup()
 }
 
 // physics update
-function update()
+function update(delta_time)
 {
 
 }
@@ -28,7 +31,7 @@ function update()
 let old_times_stamp = 0;
 function draw(time_stamp)
 {
-    delta_time = (time_stamp - old_times_stamp) / 1000;
+    let delta_time = (time_stamp - old_times_stamp) / 1000; // time between frames in seconds
     old_times_stamp = time_stamp;
     if (!isNaN(delta_time))
     {
@@ -37,8 +40,14 @@ function draw(time_stamp)
 
     if (!paused)
     {
-        update();
+        update(delta_time);
     }
+
+    // draw background
+    colorRect(0, 0, canvas.width ,canvas.height, "#000000");
+
+    let pipe = new Pipe(100, 100, 100, 100);
+    draw_pipe(pipe, GAME_HEIGHT, "#FFFFFF");
 
     window.requestAnimationFrame(draw);
 }

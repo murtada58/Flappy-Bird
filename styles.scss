@@ -1,14 +1,15 @@
 body {
     margin: 0;
-    background-color: #FFFFFF;
+    background-color: #111111;
     font-family:Roboto Condensed;
 }
 
 #title {
+    color: #FFFFFF;
     text-align: center;
 }
 
-#game_canvas {
+#flappy_bird {
     width: 960px;
     height: 600px;
     display: block;

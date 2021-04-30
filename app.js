@@ -44,21 +44,35 @@ function update(delta_time)
     if (lost)
     {
         paused = true;
+        console.log("Lost");
     }
 
     for (let i = 0; i < pipes.length; i++)
     {
-        if (!isNaN(delta_time)) // move pipe (checking delta_time to avoid errors)
+        // move pipe (checking delta_time to avoid errors)
+        if (!isNaN(delta_time)) 
         {
             pipes[i].left_x -= delta_time * PIPE_SPEED;
         }
 
+        // check for pipe collisions
+        if (pipes[i].left_x < bird.left_x + bird.width && pipes[i].left_x + pipes[i].width > bird.left_x) // check x
+        {
+            if (bird.top_y < pipes[i].top_y || bird.top_y + bird.height > pipes[i].top_y + pipes[i].gap_size) // check y
+            {
+                paused = true;
+                console.log("Lost");
+            }
+        }
+
+        // check if pipe is off screen if so remove it
         if (pipes[i].left_x <= -PIPE_WIDTH)
         {
             pipes.shift();
         }
     }
 
+    // spawn new pipe after interval time
     if (timer >= last_spwan_time + interval)
     {
         last_spwan_time = timer;

@@ -9,16 +9,21 @@ const GAME_WIDTH =  960; // should be equal to or less than canvas width in pixe
 const GAME_HEIGHT =  600; // should be equal to or less than canvas height in pixels
 const PIPE_WIDTH = 100; // width of the pipes in pixels
 const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixels per second
-const MIN_PIPE_GAP = 100;
-const MAX_PIPE_GAP = 150;
-const MIN_INTERVAL = 1;
-const MAX_INTERVAL = 1.5;
+const MIN_PIPE_GAP = 100; // the minimum pipe gap in pixels
+const MAX_PIPE_GAP = 150; // the maximum pipe gap in pixels
+const MIN_INTERVAL = 1; // the minimum time between pipe spawns in seconds
+const MAX_INTERVAL = 1.5; // the maximum time between pipe spawns in seconds
+const BIRD_HEIGHT = 25; // the height of the bird
+const BIRD_WIDTH = 30; // the width of the bird
+const BIRD_X = 240; // the birds x position
+const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 
 let paused = true; // controls wether the game is paused or not
 let timer = 0; // keeps track of time in seconds
 let interval = 0; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
+let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (canvas.height / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0);
 
 // intial setup
 function setup()
@@ -69,6 +74,9 @@ function draw(time_stamp)
 
     // draw background
     colorRect(0, 0, canvas.width ,canvas.height, "#000000");
+
+    // draw bird
+    draw_bird(bird, "#FF0000");
 
     // draw pipes
     for (let i = 0; i < pipes.length; i++)

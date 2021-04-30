@@ -1,3 +1,5 @@
+"use strict";
+
 class Pipe
 {
     constructor (left_x, top_y, gap_size, width)

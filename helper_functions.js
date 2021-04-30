@@ -1,3 +1,5 @@
+"use strict";
+
 function colorRect(leftX, topY, width, height, color)
 {
     canvas_context.fillStyle = color;

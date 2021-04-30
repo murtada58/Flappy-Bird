@@ -1,5 +1,7 @@
-canvas = document.getElementById('flappy_bird');
-canvas_context = canvas.getContext('2d');
+"use strict";
+
+let canvas = document.getElementById('flappy_bird');
+let canvas_context = canvas.getContext('2d');
 
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
@@ -25,6 +27,7 @@ let interval = 0; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
 let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (canvas.height / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0);
+let points = 0;
 
 // intial setup
 function setup()
@@ -49,10 +52,24 @@ function update(delta_time)
 
     for (let i = 0; i < pipes.length; i++)
     {
+        let passed = true; // used to check for transition out of pipe to add a point
+        // checking if current pipe has not been passed yet (to the right of the bird)
+        if (pipes[i].left_x + pipes[i].width > bird.left_x)
+        {
+            passed = false
+        }
+
         // move pipe (checking delta_time to avoid errors)
         if (!isNaN(delta_time)) 
         {
             pipes[i].left_x -= delta_time * PIPE_SPEED;
+        }
+
+        // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
+        if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
+        {
+            points++;
+            console.log(points);
         }
 
         // check for pipe collisions
@@ -119,6 +136,7 @@ function start()
     timer = 0; // in seconds
     interval = 0; // in seconds
     last_spwan_time = 0; // in seconds
+    points = 0;
     bird.top_y = (canvas.height / 2) - (BIRD_HEIGHT / 2);
     bird.current_speed = 0;
 }

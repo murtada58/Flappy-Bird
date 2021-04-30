@@ -27,7 +27,7 @@ function draw_pipe(pipe, game_height, color, head, body)
     
 
     //colorRect(pipe.left_x, pipe.top_y + pipe.gap_size, pipe.width , game_height - (pipe.top_y + pipe.gap_size), color); // bottom pipe
-    canvas_context.drawImage(body, pipe.left_x, pipe.top_y + pipe.gap_size + 5, pipe.width, game_height - (pipe.top_y + pipe.gap_size));
+    canvas_context.drawImage(body, pipe.left_x, pipe.top_y + pipe.gap_size + 5, pipe.width, game_height - (pipe.top_y + pipe.gap_size)-8);
     canvas_context.drawImage(head, pipe.left_x - 10, pipe.top_y + pipe.gap_size, pipe.width+20, 40);
     //colorRect(pipe.left_x, pipe.top_y + pipe.gap_size, pipe.width , game_height - (pipe.top_y + pipe.gap_size), color); // bottom pipe
 }
@@ -39,7 +39,14 @@ function draw_bird(bird, color)
     //colorRect(bird.left_x, bird.top_y, bird.width, bird.height, color);
 }
 
-function draw_background(background, game_width, game_height)
+function draw_background(background, background_pos, game_width, game_height)
 {
-    canvas_context.drawImage(background, 0, 0, game_width, game_height);
+    canvas_context.drawImage(background, background_pos, 0, game_width, game_height);
+    canvas_context.drawImage(background, background_pos + game_width, 0, game_width, game_height);
+}
+
+function draw_ground(ground, position, game_height, game_width, canvas_height)
+{
+    canvas_context.drawImage(ground, position, game_height - 2, game_width, Math.max(canvas_height - game_height, 200));
+    canvas_context.drawImage(ground, position+game_width, game_height - 2, game_width, Math.max(canvas_height - game_height, 200));
 }

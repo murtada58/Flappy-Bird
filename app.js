@@ -39,7 +39,12 @@ function setup()
 function update(delta_time)
 {
     bird.apply_gravity(GRAVITY, delta_time);
-    bird.update_position(delta_time);
+    let lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
+
+    if (lost)
+    {
+        paused = true;
+    }
 
     for (let i = 0; i < pipes.length; i++)
     {
@@ -93,6 +98,17 @@ function draw(time_stamp)
 
 setup();
 
+// reseting global variable to start conditions
+function start()
+{
+    pipes = [];
+    timer = 0; // in seconds
+    interval = 0; // in seconds
+    last_spwan_time = 0; // in seconds
+    bird.top_y = (canvas.height / 2) - (BIRD_HEIGHT / 2);
+    bird.current_speed = 0;
+}
+
 // keyboard input
 let up_key_down = false;
 let down_key_down = false;
@@ -144,6 +160,7 @@ function keyPressed(evt)
             if (!enter_key_down)
             {  
                 paused = false;
+                start();
                 enter_key_down = true;
             }
             break;

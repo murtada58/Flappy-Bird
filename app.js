@@ -26,8 +26,9 @@ let timer = 0; // keeps track of time in seconds
 let interval = 0; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
-let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (canvas.height / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0);
+let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0);
 let points = 0;
+let ai_mode = 0; // 0 is manual
 
 // intial setup
 function setup()
@@ -95,7 +96,12 @@ function update(delta_time)
         last_spwan_time = timer;
         interval = random(MIN_INTERVAL, MAX_INTERVAL);
         let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
-        pipes.push(new Pipe(GAME_WIDTH, randomInt(canvas.height * 0.1, (canvas.height * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
+        pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
+    }
+
+    if (ai_mode === 1)
+    {
+        ai1();
     }
 }
 
@@ -113,7 +119,7 @@ function draw(time_stamp)
     }
 
     // draw background
-    colorRect(0, 0, canvas.width ,canvas.height, "#000000");
+    colorRect(0, 0, GAME_WIDTH , GAME_HEIGHT, "#000000");
 
     // draw bird
     draw_bird(bird, "#FF0000");
@@ -137,8 +143,30 @@ function start()
     interval = 0; // in seconds
     last_spwan_time = 0; // in seconds
     points = 0;
-    bird.top_y = (canvas.height / 2) - (BIRD_HEIGHT / 2);
+    bird.top_y = (GAME_HEIGHT / 2) - (bird.height / 2);
     bird.current_speed = 0;
+}
+
+// simple flappy bird ai
+function ai1()
+{
+    let current_pipe_found = false;
+    for (let i = 0; i < pipes.length; i++)
+    {
+        if (pipes[i].left_x + pipes[i].width >= bird.left_x && !current_pipe_found)
+        {
+            current_pipe_found = true;
+            if (bird.top_y >= pipes[i].top_y + pipes[i].gap_size - (bird.height + 10))
+            {
+                bird.jump();
+            }
+        }
+    }
+
+    if (bird.top_y >= GAME_HEIGHT / 2 && !current_pipe_found)
+    {
+        bird.jump();
+    }
 }
 
 // keyboard input
@@ -197,7 +225,7 @@ function keyPressed(evt)
             }
             break;
         case 32:
-            if (!space_key_down && !paused)
+            if (!space_key_down && !paused && ai_mode === 0)
             {  
                 bird.jump();
                 space_key_down = true;
@@ -228,14 +256,16 @@ function keyPressed(evt)
             }
             break;
         case 48:
-            if (!zero_key_down && !paused)
+            if (!zero_key_down)
             {
+                ai_mode = 0;
                 zero_key_down = true;
             }
             break;
         case 49:
-            if (!one_key_down && !paused)
+            if (!one_key_down)
             {
+                ai_mode = 1;
                 one_key_down = true;
             }
             break;

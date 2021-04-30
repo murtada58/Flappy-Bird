@@ -13,14 +13,15 @@ class Pipe
 
 class Bird
 {
-    constructor (width, height, left_x, top_y, jump_speed, current_speed)
+    constructor (width, height, left_x, top_y, jump_speed, current_speed, sprite)
     {
         this.width = width;
         this.height = height;
         this.left_x = left_x;
         this.top_y = top_y;
         this.jump_speed = jump_speed;
-        this.current_speed = current_speed;  
+        this.current_speed = current_speed;
+        this.sprite = sprite;
     }
 
     jump()

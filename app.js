@@ -11,22 +11,31 @@ const GAME_WIDTH =  960; // should be equal to or less than canvas width in pixe
 const GAME_HEIGHT =  600; // should be equal to or less than canvas height in pixels
 const PIPE_WIDTH = 100; // width of the pipes in pixels
 const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixels per second
-const MIN_PIPE_GAP = 100; // the minimum pipe gap in pixels
+const MIN_PIPE_GAP = 125; // the minimum pipe gap in pixels
 const MAX_PIPE_GAP = 150; // the maximum pipe gap in pixels
-const MIN_INTERVAL = 1; // the minimum time between pipe spawns in seconds
-const MAX_INTERVAL = 1.5; // the maximum time between pipe spawns in seconds
-const BIRD_HEIGHT = 25; // the height of the bird
-const BIRD_WIDTH = 30; // the width of the bird
+const MIN_INTERVAL = 1.25; // the minimum time between pipe spawns in seconds
+const MAX_INTERVAL = 2; // the maximum time between pipe spawns in seconds
+const BIRD_HEIGHT = 50; // the height of the bird
+const BIRD_WIDTH = 60; // the width of the bird
 const BIRD_X = 240; // the birds x position
 const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 const GRAVITY = 2000; // the gravity strength pulling the bird down
+
+let sprite = new Image();
+sprite.src = "./assets/one_eye_monster.png";
+let background = new Image();
+background.src = "./assets/background1.png";
+let pipe_head = new Image();
+pipe_head.src = "./assets/pipe_head.png";
+let pipe_body = new Image();
+pipe_body.src = "./assets/pipe_body.png";
 
 let paused = true; // controls wether the game is paused or not
 let timer = 0; // keeps track of time in seconds
 let interval = 0; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
-let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0);
+let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0, sprite);
 let points = 0;
 let ai_mode = 0; // 0 is manual
 
@@ -119,7 +128,8 @@ function draw(time_stamp)
     }
 
     // draw background
-    colorRect(0, 0, GAME_WIDTH , GAME_HEIGHT, "#000000");
+    //colorRect(0, 0, GAME_WIDTH , GAME_HEIGHT, "#4287f5");
+    draw_background(background, GAME_WIDTH, GAME_HEIGHT);
 
     // draw bird
     draw_bird(bird, "#FF0000");
@@ -127,7 +137,7 @@ function draw(time_stamp)
     // draw pipes
     for (let i = 0; i < pipes.length; i++)
     {
-        draw_pipe(pipes[i], GAME_HEIGHT, "#FFFFFF");
+        draw_pipe(pipes[i], GAME_HEIGHT, "#000000", pipe_head, pipe_body);
     }
 
     window.requestAnimationFrame(draw);

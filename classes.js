@@ -20,4 +20,19 @@ class Bird
         this.jump_speed = jump_speed;
         this.current_speed = current_speed;  
     }
+
+    jump()
+    {
+        this.current_speed = this.jump_speed;
+    }
+
+    apply_gravity(gravity, delta_time)
+    {
+        this.current_speed += GRAVITY * delta_time;
+    }
+
+    update_position(delta_time)
+    {
+        this.top_y += this.current_speed * delta_time;
+    }
 }

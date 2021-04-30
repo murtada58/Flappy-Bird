@@ -17,6 +17,7 @@ const BIRD_HEIGHT = 25; // the height of the bird
 const BIRD_WIDTH = 30; // the width of the bird
 const BIRD_X = 240; // the birds x position
 const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
+const GRAVITY = 2000; // the gravity strength pulling the bird down
 
 let paused = true; // controls wether the game is paused or not
 let timer = 0; // keeps track of time in seconds
@@ -37,6 +38,9 @@ function setup()
 // physics update
 function update(delta_time)
 {
+    bird.apply_gravity(GRAVITY, delta_time);
+    bird.update_position(delta_time);
+
     for (let i = 0; i < pipes.length; i++)
     {
         if (!isNaN(delta_time)) // move pipe (checking delta_time to avoid errors)
@@ -146,6 +150,7 @@ function keyPressed(evt)
         case 32:
             if (!space_key_down && !paused)
             {  
+                bird.jump();
                 space_key_down = true;
             }
             break;

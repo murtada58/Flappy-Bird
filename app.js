@@ -5,26 +5,37 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 // constants
-const GAME_WIDTH =  960; // should be equal to or less than canvas width
-const GAME_HEIGHT =  600; // should be equal to or less than canvas height
-const PIPE_WIDTH = 100; // width of the pipes
+const GAME_WIDTH =  960; // should be equal to or less than canvas width in pixels
+const GAME_HEIGHT =  600; // should be equal to or less than canvas height in pixels
+const PIPE_WIDTH = 100; // width of the pipes in pixels
+const PIPE_SPEED = 100; // the speed that pipes move from right to left at pixels per second
 
-let paused = true;
-let timer = 0;
+
+let paused = true; // controls wether the game is paused or not
+let timer = 0; // keeps track of time
+let pipes = []; // contains all of the pipes
 
 // intial setup
 function setup()
 {
     document.addEventListener("keydown", keyPressed);
     document.addEventListener("keyup", keyUp);
-    
+
+    pipes.push(new Pipe(100, 100, 100, 100));
+    pipes.push(new Pipe(400, 200, 100, 100));
     draw();
 }
 
 // physics update
 function update(delta_time)
 {
-
+    for (let i = 0; i < pipes.length; i++)
+    {
+        if (!isNaN(delta_time)) // move pipe (checking delta_time to avoid errors)
+        {
+            pipes[i].left_x -= delta_time * PIPE_SPEED;
+        }
+    }
 }
 
 // draw update
@@ -46,8 +57,10 @@ function draw(time_stamp)
     // draw background
     colorRect(0, 0, canvas.width ,canvas.height, "#000000");
 
-    let pipe = new Pipe(100, 100, 100, 100);
-    draw_pipe(pipe, GAME_HEIGHT, "#FFFFFF");
+    for (let i = 0; i < pipes.length; i++)
+    {
+        draw_pipe(pipes[i], GAME_HEIGHT, "#FFFFFF");
+    }
 
     window.requestAnimationFrame(draw);
 }

@@ -13,7 +13,7 @@ class Pipe
 
 class Bird
 {
-    constructor (width, height, left_x, top_y, jump_speed, current_speed, sprite)
+    constructor (width, height, left_x, top_y, jump_speed, current_speed, sprites)
     {
         this.width = width;
         this.height = height;
@@ -21,7 +21,22 @@ class Bird
         this.top_y = top_y;
         this.jump_speed = jump_speed;
         this.current_speed = current_speed;
-        this.sprite = sprite;
+        this.sprites = sprites;
+        this.sprite = sprites[0];
+        this.current_sprite = 0;
+        this.sprite_interval = 0.1; // in seconds
+        this.time = 0;
+    }
+
+    animate(time)
+    {
+        if (this.time + this.sprite_interval <= time && !paused)
+        {
+            this.current_sprite += 1;
+            this.current_sprite %= this.sprites.length;
+            this.sprite = this.sprites[this.current_sprite];
+            this.time = time;
+        }
     }
 
     jump()

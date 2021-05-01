@@ -22,9 +22,11 @@ const BIRD_X = GAME_WIDTH * 0.25; // the birds x position
 const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 const GRAVITY = 2000; // the gravity strength pulling the bird down
 
-let sprite = new Image();
-//sprite.src = "./assets/one_eye_monster.png";
-sprite.src = "./assets/bird.png";
+let sprites = [new Image(), new Image(), new Image()];
+//sprites.src = "./assets/one_eye_monster.png";
+sprites[0].src = "./assets/yellowbird-downflap.png";
+sprites[1].src = "./assets/yellowbird-midflap.png";
+sprites[2].src = "./assets/yellowbird-upflap.png";
 let background = new Image();
 background.src = "./assets/background1.png";
 let pipe_head = new Image();
@@ -44,7 +46,7 @@ let timer = 0; // keeps track of time in seconds
 let interval = 2; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
-let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0, sprite);
+let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0, sprites);
 let points = 0;
 let high_score = 0;
 let ai_mode = 0; // 0 is manual
@@ -182,9 +184,10 @@ function draw(time_stamp)
     }
 
     // draw background
-    //color_rect(0, 0, GAME_WIDTH , GAME_HEIGHT, "#4287f5");
     draw_background(background, background_pos, GAME_WIDTH, GAME_HEIGHT);
 
+    // animate bird
+    bird.animate(timer);
     // draw bird
     draw_bird(bird, "#FF0000");
 
@@ -215,6 +218,7 @@ function start()
     points = 0;
     bird.top_y = (GAME_HEIGHT / 2) - (bird.height / 2);
     bird.current_speed = 0;
+    bird.time = 0;
 }
 
 // simple flappy bird ai

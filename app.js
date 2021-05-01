@@ -58,6 +58,10 @@ function setup()
     document.addEventListener("keyup", keyUp);
 
     background_music.loop();
+    hit_sound.mute();
+    wing_sound.mute();
+    background_music.mute();
+    point_sound.mute();
 
     let isTouchDevice = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
     if (isTouchDevice)
@@ -322,7 +326,6 @@ function keyPressed(evt)
         case 40:
             if (!down_key_down)
             {
-                console.log("pressed")
                 hit_sound.mute();
                 wing_sound.mute();
                 background_music.mute();

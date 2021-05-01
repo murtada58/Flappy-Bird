@@ -206,7 +206,11 @@ function draw(time_stamp)
     window.requestAnimationFrame(draw);
 }
 
-setup();
+document.addEventListener('DOMContentLoaded', function(event)
+{
+    setup();
+})
+
 
 // reseting global variable to start conditions
 function start()

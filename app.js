@@ -304,20 +304,29 @@ function keyPressed(evt)
             }
             break;
         case 38:
-            if (!up_key_down && !paused)
+            if (!up_key_down)
             {
+                hit_sound.unmute();
+                wing_sound.unmute();
+                background_music.unmute();
+                point_sound.unmute();
                 up_key_down = true;
             }
             break;
         case 39:
             if (!right_key_down && !paused)
-            {             
+            {                
                 right_key_down = true;
             }
             break;
         case 40:
-            if (!down_key_down && !paused)
+            if (!down_key_down)
             {
+                console.log("pressed")
+                hit_sound.mute();
+                wing_sound.mute();
+                background_music.mute();
+                point_sound.mute();
                 down_key_down = true;
             }
             break;

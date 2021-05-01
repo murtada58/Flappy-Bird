@@ -77,4 +77,14 @@ class Sound
         this.sound.loop = true;
     }
 
+    mute()
+    {
+        this.sound.muted = true;
+    }
+
+    unmute()
+    {
+        this.sound.muted = false;
+    }
+
 }

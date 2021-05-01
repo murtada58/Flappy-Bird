@@ -1,9 +1,11 @@
 "use strict";
 
-function color_rect(leftX, topY, width, height, color)
+function color_rect(leftX, topY, width, height, color, alpha=1)
 {
+    canvas_context.globalAlpha = alpha;
     canvas_context.fillStyle = color;
     canvas_context.fillRect(leftX, topY, width, height);
+    canvas_context.globalAlpha = 1;
 }
 
 
@@ -43,7 +45,7 @@ function draw_bird(bird, color)
     canvas_context.translate(-(bird.left_x + (bird.width/2)), -(bird.top_y + (bird.height/2)));
     canvas_context.drawImage(bird.sprite, bird.left_x, bird.top_y, bird.width, bird.height);
     canvas_context.restore();
-    //color_rect(bird.left_x, bird.top_y, bird.width, bird.height, color);
+    //color_rect(bird.left_x, bird.top_y, bird.width, bird.height, color, 0.2);
 }
 
 function draw_background(background, background_pos, game_width, game_height)

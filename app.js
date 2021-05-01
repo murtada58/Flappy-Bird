@@ -7,8 +7,8 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 // constants
-const GAME_WIDTH =  700; // should be equal to or less than canvas width in pixels
-const GAME_HEIGHT =  500; // should be equal to or less than canvas height in pixels
+const GAME_WIDTH =  canvas.width * 0.75; // should be equal to or less than canvas width in pixels
+const GAME_HEIGHT =  canvas.height * 0.8; // should be equal to or less than canvas height in pixels
 const PIPE_WIDTH = 100; // width of the pipes in pixels
 const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixels per second
 const BACKGROUND_SPEED = PIPE_WIDTH * 0.3; // the background scroll speed in pixels
@@ -23,8 +23,8 @@ const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 const GRAVITY = 2000; // the gravity strength pulling the bird down
 
 let sprite = new Image();
-sprite.src = "./assets/one_eye_monster.png";
-//sprite.src = "./assets/bird.png";
+//sprite.src = "./assets/one_eye_monster.png";
+sprite.src = "./assets/bird.png";
 let background = new Image();
 background.src = "./assets/background1.png";
 let pipe_head = new Image();

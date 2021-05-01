@@ -18,7 +18,7 @@ const MIN_INTERVAL = 1.25; // the minimum time between pipe spawns in seconds
 const MAX_INTERVAL = 2; // the maximum time between pipe spawns in seconds
 const BIRD_HEIGHT = 50; // the height of the bird
 const BIRD_WIDTH = 70; // the width of the bird
-const BIRD_X = 240; // the birds x position
+const BIRD_X = GAME_WIDTH * 0.25; // the birds x position
 const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 const GRAVITY = 2000; // the gravity strength pulling the bird down
 

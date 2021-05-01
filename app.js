@@ -7,8 +7,8 @@ canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 // constants
-const GAME_WIDTH =  canvas.width * 0.75; // should be equal to or less than canvas width in pixels
-const GAME_HEIGHT =  canvas.height * 0.8; // should be equal to or less than canvas height in pixels
+const GAME_WIDTH =  canvas.width - ((canvas.width > 700) * 250); // should be equal to or less than canvas width in pixels
+const GAME_HEIGHT =  canvas.height - Math.max(150, canvas.height * 0.2); // should be equal to or less than canvas height in pixels
 const PIPE_WIDTH = 100; // width of the pipes in pixels
 const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixels per second
 const BACKGROUND_SPEED = PIPE_WIDTH * 0.3; // the background scroll speed in pixels
@@ -31,8 +31,10 @@ let pipe_head = new Image();
 pipe_head.src = "./assets/pipe_head.png";
 let pipe_body = new Image();
 pipe_body.src = "./assets/pipe_body.png";
-let ground = new Image();
-ground.src = "./assets/ground.png";
+let top_ground = new Image();
+top_ground.src = "./assets/top_ground.png";
+let bottom_ground = new Image();
+bottom_ground.src = "./assets/bottom_ground.png";
 let ground_pos = 0;
 let background_pos = 0;
 
@@ -193,10 +195,10 @@ function draw(time_stamp)
     }
 
     // draw ground
-    draw_ground(ground, ground_pos, GAME_HEIGHT, GAME_WIDTH, canvas.height);
+    draw_ground(top_ground, bottom_ground, ground_pos, GAME_HEIGHT, GAME_WIDTH, canvas.height);
 
     // draw stats
-    draw_stats(GAME_WIDTH, canvas.width, canvas.height, timer, points, high_score);
+    draw_stats(GAME_WIDTH, GAME_HEIGHT, canvas.width, canvas.height, timer, points, high_score);
 
     window.requestAnimationFrame(draw);
 }

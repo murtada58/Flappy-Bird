@@ -37,6 +37,7 @@ let ground_pos = 0;
 let background_pos = 0;
 
 let paused = true; // controls wether the game is paused or not
+let lost = true; // indicates wether the user has lost or not starts at true for simplicity
 let timer = 0; // keeps track of time in seconds
 let interval = 2; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
@@ -45,12 +46,38 @@ let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_H
 let points = 0;
 let high_score = 0;
 let ai_mode = 0; // 0 is manual
+let hit_sound = new Sound("./assets/sfx_hit.wav");
+let point_sound = new Sound("./assets/sfx_point.wav");
+let wing_sound = new Sound("./assets/sfx_wing.wav");
+let background_music = new Sound("./assets/background_music.mp3");
 
 // intial setup
 function setup()
 {
     document.addEventListener("keydown", keyPressed);
     document.addEventListener("keyup", keyUp);
+
+    background_music.loop();
+
+    let isTouchDevice = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+    if (isTouchDevice)
+    {
+        canvas.addEventListener("touchstart", 
+            function(event)
+            {
+                event.preventDefault();
+                jump();
+            });
+    }
+    else
+    {
+        canvas.addEventListener("mousedown", 
+            function(event)
+            {
+                event.preventDefault();
+                jump();
+            });
+    }
 
     draw();
 }
@@ -59,10 +86,11 @@ function setup()
 function update(delta_time)
 {
     bird.apply_gravity(GRAVITY, delta_time);
-    let lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
+    lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
 
     if (lost)
     {
+        hit_sound.play();
         paused = true;
         console.log("Lost");
     }
@@ -85,6 +113,7 @@ function update(delta_time)
         // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
         if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
         {
+            point_sound.play();
             points++;
             high_score = Math.max(high_score, points);
             // console.log(points);
@@ -95,7 +124,9 @@ function update(delta_time)
         {
             if (bird.top_y < pipes[i].top_y || bird.top_y + bird.height > pipes[i].top_y + pipes[i].gap_size) // check y
             {
+                hit_sound.play();
                 paused = true;
+                lost = true;
                 console.log("Lost");
             }
         }
@@ -138,7 +169,7 @@ function draw(time_stamp)
     let delta_time = (time_stamp - old_times_stamp) / 1000; // time between frames in seconds
     old_times_stamp = time_stamp;
 
-    if (!paused && !isNaN(delta_time))
+    if (!lost && !paused && !isNaN(delta_time))
     {
         timer += delta_time;
         update(delta_time);
@@ -252,15 +283,17 @@ function keyPressed(evt)
         case 13:
             if (!enter_key_down)
             {  
+                background_music.play();
                 paused = false;
+                lost = false;
                 start();
                 enter_key_down = true;
             }
             break;
         case 32:
-            if (!space_key_down && !paused && ai_mode === 0)
+            if (!space_key_down)
             {  
-                bird.jump();
+                jump();
                 space_key_down = true;
             }
             break;
@@ -302,5 +335,21 @@ function keyPressed(evt)
                 one_key_down = true;
             }
             break;
+    }
+}
+
+function jump()
+{
+    background_music.play();
+    if (!lost && !paused && ai_mode === 0)
+    {  
+        // wing_sound.play();
+        bird.jump();
+    }
+    else if (lost)
+    {
+        paused = false;
+        lost = false;
+        start();
     }
 }

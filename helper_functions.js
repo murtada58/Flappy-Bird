@@ -63,7 +63,7 @@ function draw_ground(top_ground, bottom_ground, position, game_height, game_widt
     canvas_context.drawImage(top_ground, position+game_width, game_height - 2, game_width, 50);
 }
 
-function draw_stats(game_width, game_height, canvas_width, canvas_height, timer, points, high_score)
+function draw_stats(game_width, game_height, canvas_width, canvas_height, fps, real_time, game_time, points, high_score)
 {
     if (canvas_width >= 700)
     {
@@ -71,15 +71,17 @@ function draw_stats(game_width, game_height, canvas_width, canvas_height, timer,
 
         canvas_context.fillStyle = "#000000";
         canvas_context.font = '25px roboto condensed';
-        canvas_context.fillText("Timer: " + (Math.round(timer * 100) / 100).toFixed(2) + "s", game_width + 12.5, 25);
-        canvas_context.fillText("Points: " + points, game_width + 12.5, 60);
-        canvas_context.fillText("High Score: " + high_score, game_width + 12.5, 95);
+        canvas_context.fillText("FPS: " + Math.round(fps), game_width + 12.5, 25 + (35*0));
+        canvas_context.fillText("Real Time: " + (Math.round(real_time * 100) / 100).toFixed(2) + "s", game_width + 12.5, 25 + (35*1));
+        canvas_context.fillText("Game Time: " + (Math.round(game_time * 100) / 100).toFixed(2) + "s", game_width + 12.5, 25 + (35*2));
+        canvas_context.fillText("Points: " + points, game_width + 12.5, 25 + (35*3));
+        canvas_context.fillText("High Score: " + high_score, game_width + 12.5, 25 + (35*4));
     }
     else
     {
         canvas_context.fillStyle = "#000000";
         canvas_context.font = '25px roboto condensed';
-        canvas_context.fillText("Timer: " + (Math.round(timer * 100) / 100).toFixed(2) + "s", 12.5, game_height + 65);
+        canvas_context.fillText("Game Time: " + (Math.round(game_time * 100) / 100).toFixed(2) + "s", 12.5, game_height + 65);
         canvas_context.fillText("Points: " + points, 12.5, game_height + 100);
         canvas_context.fillText("High Score: " + high_score, 12.5, game_height + 135);
     }

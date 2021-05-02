@@ -43,8 +43,10 @@ let background_pos = 0;
 let paused = true; // controls wether the game is paused or not
 let lost = true; // indicates wether the user has lost or not starts at true for simplicity
 let fps = 120; // the frames per second that the game runs on
+let time_step = 4; // the timestep that the game runs on in ms, 4ms is the minimum for set timeout
 let time_factor = 1; // the factor of game time to real time so 2 means game time is twice as fast as realtime
-let timer = 0; // keeps track of time in seconds
+let game_time = 0; // keeps track of game time in seconds
+let real_time = 0; // keeps track of the real life time in seconds
 let interval = 2; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
@@ -88,107 +90,121 @@ function setup()
                 jump();
             });
     }
-    draw(1 / fps);
+    setTimeout(
+        function()
+        {
+            update((time_step/1000) * time_factor)
+        }, time_step);
+    window.requestAnimationFrame(draw);
 }
 
 // physics update
 function update(delta_time)
 {
-    bird.apply_gravity(GRAVITY, delta_time);
-    lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
-
-    if (lost)
+    if (!lost && !paused)
     {
-        hit_sound.play();
-        paused = true;
-        console.log("Lost");
-    }
+        game_time += delta_time;
+        bird.apply_gravity(GRAVITY, delta_time);
+        lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
 
-    for (let i = 0; i < pipes.length; i++)
-    {
-        let passed = true; // used to check for transition out of pipe to add a point
-        // checking if current pipe has not been passed yet (to the right of the bird)
-        if (pipes[i].left_x + pipes[i].width > bird.left_x)
+        if (lost)
         {
-            passed = false
+            hit_sound.play();
+            paused = true;
+            console.log("Lost");
         }
 
-        // move pipe (checking delta_time to avoid errors)
-        if (!isNaN(delta_time)) 
+        for (let i = 0; i < pipes.length; i++)
         {
-            pipes[i].left_x -= delta_time * PIPE_SPEED;
-        }
-
-        // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
-        if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
-        {
-            point_sound.play();
-            points++;
-            high_score = Math.max(high_score, points);
-            // console.log(points);
-        }
-
-        // check for pipe collisions
-        if (pipes[i].left_x < bird.left_x + bird.width && pipes[i].left_x + pipes[i].width > bird.left_x) // check x
-        {
-            if (bird.top_y < pipes[i].top_y || bird.top_y + bird.height > pipes[i].top_y + pipes[i].gap_size) // check y
+            let passed = true; // used to check for transition out of pipe to add a point
+            // checking if current pipe has not been passed yet (to the right of the bird)
+            if (pipes[i].left_x + pipes[i].width > bird.left_x)
             {
-                hit_sound.play();
-                paused = true;
-                lost = true;
-                console.log("Lost");
+                passed = false
+            }
+
+            // move pipe (checking delta_time to avoid errors)
+            if (!isNaN(delta_time)) 
+            {
+                pipes[i].left_x -= delta_time * PIPE_SPEED;
+            }
+
+            // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
+            if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
+            {
+                point_sound.play();
+                points++;
+                high_score = Math.max(high_score, points);
+                // console.log(points);
+            }
+
+            // check for pipe collisions
+            if (pipes[i].left_x < bird.left_x + bird.width && pipes[i].left_x + pipes[i].width > bird.left_x) // check x
+            {
+                if (bird.top_y < pipes[i].top_y || bird.top_y + bird.height > pipes[i].top_y + pipes[i].gap_size) // check y
+                {
+                    hit_sound.play();
+                    paused = true;
+                    lost = true;
+                    console.log("Lost");
+                }
+            }
+
+            // check if pipe is off screen if so remove it
+            if (pipes[i].left_x <= -PIPE_WIDTH)
+            {
+                pipes.shift();
             }
         }
 
-        // check if pipe is off screen if so remove it
-        if (pipes[i].left_x <= -PIPE_WIDTH)
+        // spawn new pipe after interval time
+        if (game_time >= last_spwan_time + interval)
         {
-            pipes.shift();
+            last_spwan_time = game_time;
+            interval = random(MIN_INTERVAL, MAX_INTERVAL);
+            let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
+            pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
+        }
+
+        // ground scroll
+        if (!isNaN(delta_time)) 
+        {
+            ground_pos -= delta_time * PIPE_SPEED;
+            ground_pos %= GAME_WIDTH;
+            background_pos -= (delta_time * BACKGROUND_SPEED);
+            background_pos %= GAME_WIDTH;
+        }
+
+        if (ai_mode === 1)
+        {
+            ai1();
         }
     }
 
-    // spawn new pipe after interval time
-    if (timer >= last_spwan_time + interval)
-    {
-        last_spwan_time = timer;
-        interval = random(MIN_INTERVAL, MAX_INTERVAL);
-        let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
-        pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
-    }
-
-    // ground scroll
-    if (!isNaN(delta_time)) 
-    {
-        ground_pos -= delta_time * PIPE_SPEED;
-        ground_pos %= GAME_WIDTH;
-        background_pos -= (delta_time * BACKGROUND_SPEED);
-        background_pos %= GAME_WIDTH;
-    }
-
-    if (ai_mode === 1)
-    {
-        ai1();
-    }
+    setTimeout(
+        function()
+        {
+            update((time_step/1000) * time_factor)
+        }, time_step);
 }
 
 // draw update
-//let old_times_stamp = 0;
-function draw(dt)
+let old_times_stamp = 0;
+function draw(time_stamp)
 {
-    let delta_time = dt * time_factor;
-    //let delta_time = ((time_stamp - old_times_stamp) / 1000) * time_factor; // time between frames in seconds
-    //old_times_stamp = time_stamp;
-    if (!lost && !paused && !isNaN(delta_time))
+    let delta_time = ((time_stamp - old_times_stamp) / 1000); // time between frames in seconds
+    fps = 1/delta_time;
+    old_times_stamp = time_stamp;
+    if (!lost && !paused)
     {
-        timer += delta_time;
-        update(delta_time);
+        real_time += delta_time;
     }
 
     // draw background
     draw_background(background, background_pos, GAME_WIDTH, GAME_HEIGHT);
 
     // animate bird
-    bird.animate(timer);
+    bird.animate(game_time);
     // draw bird
     draw_bird(bird, "#FF0000");
 
@@ -202,14 +218,9 @@ function draw(dt)
     draw_ground(top_ground, bottom_ground, ground_pos, GAME_HEIGHT, GAME_WIDTH, canvas.height);
 
     // draw stats
-    draw_stats(GAME_WIDTH, GAME_HEIGHT, canvas.width, canvas.height, timer, points, high_score);
+    draw_stats(GAME_WIDTH, GAME_HEIGHT, canvas.width, canvas.height, fps, real_time, game_time, points, high_score);
 
-    setTimeout(
-        function()
-        {
-            draw(1 / fps)
-        }, 1000 / fps)
-    //window.requestAnimationFrame(draw);
+    window.requestAnimationFrame(draw);
 }
 
 document.addEventListener('DOMContentLoaded', function(event)
@@ -222,7 +233,8 @@ document.addEventListener('DOMContentLoaded', function(event)
 function start()
 {
     pipes = [];
-    timer = 0; // in seconds
+    game_time = 0; // in seconds
+    real_time = 0; // in seconds
     interval = 2; // in seconds
     last_spwan_time = 0; // in seconds
     points = 0;

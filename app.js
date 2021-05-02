@@ -135,9 +135,9 @@ function update(delta_time)
                 }
 
                 // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
-                if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
+                if (passed === false && pipes[i].left_x + pipes[i].width <=  bird.left_x)
                 {
-                    if (ai_mode === 0)
+                    if (ai_mode === 0) // only play hit sound when in player mode (this saves a bit of perfomance)
                     {
                         point_sound.play();
                     }                    

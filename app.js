@@ -14,7 +14,7 @@ const PIPE_SPEED = 250; // the speed that pipes move from right to left at pixel
 const BACKGROUND_SPEED = PIPE_WIDTH * 0.3; // the background scroll speed in pixels
 const MIN_PIPE_GAP = 125; // the minimum pipe gap in pixels
 const MAX_PIPE_GAP = 150; // the maximum pipe gap in pixels
-const MIN_INTERVAL = 1.25; // the minimum time between pipe spawns in seconds
+const MIN_INTERVAL = 1.5; // the minimum time between pipe spawns in seconds
 const MAX_INTERVAL = 2; // the maximum time between pipe spawns in seconds
 const BIRD_HEIGHT = 50; // the height of the bird
 const BIRD_WIDTH = 70; // the width of the bird
@@ -43,7 +43,8 @@ let background_pos = 0;
 let paused = true; // controls wether the game is paused or not
 let lost = true; // indicates wether the user has lost or not starts at true for simplicity
 let fps = 120; // the frames per second that the game runs on
-let time_step = 4; // the timestep that the game runs on in ms, 4ms is the minimum for set timeout
+let time_step = 10; // the timestep that the game runs on in ms, 4ms is the minimum for set timeout
+let ai_timestep_divider_value = 10000; // when in ai mode the timestep is divided by this value
 let time_factor = 1; // the factor of game time to real time so 2 means game time is twice as fast as realtime
 let game_time = 0; // keeps track of game time in seconds
 let real_time = 0; // keeps track of the real life time in seconds
@@ -93,7 +94,7 @@ function setup()
     setTimeout(
         function()
         {
-            update((time_step/1000) * time_factor)
+            update(((time_step/1000) * time_factor))
         }, time_step);
     window.requestAnimationFrame(draw);
 }
@@ -103,84 +104,96 @@ function update(delta_time)
 {
     if (!lost && !paused)
     {
-        game_time += delta_time;
-        bird.apply_gravity(GRAVITY, delta_time);
-        lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
-
-        if (lost)
+        let ai_timestep_divider = (ai_timestep_divider_value * (ai_mode !== 0)) + (1 * (ai_mode === 0)); // dividies the timestep if in ai mode to allow the game to run more accuratley
+        delta_time /= ai_timestep_divider;
+        for (let i = 0; i < ai_timestep_divider; i++)
         {
-            hit_sound.play();
-            paused = true;
-            console.log("Lost");
-        }
+            game_time += delta_time;
+            bird.apply_gravity(GRAVITY, delta_time);
+            lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
 
-        for (let i = 0; i < pipes.length; i++)
-        {
-            let passed = true; // used to check for transition out of pipe to add a point
-            // checking if current pipe has not been passed yet (to the right of the bird)
-            if (pipes[i].left_x + pipes[i].width > bird.left_x)
+            if (lost)
             {
-                passed = false
+                hit_sound.play();
+                paused = true;
+                console.log("Lost");
             }
 
-            // move pipe (checking delta_time to avoid errors)
-            if (!isNaN(delta_time)) 
+            for (let i = 0; i < pipes.length; i++)
             {
-                pipes[i].left_x -= delta_time * PIPE_SPEED;
-            }
-
-            // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
-            if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
-            {
-                point_sound.play();
-                points++;
-                high_score = Math.max(high_score, points);
-                // console.log(points);
-            }
-
-            // check for pipe collisions
-            if (pipes[i].left_x < bird.left_x + bird.width && pipes[i].left_x + pipes[i].width > bird.left_x) // check x
-            {
-                if (bird.top_y < pipes[i].top_y || bird.top_y + bird.height > pipes[i].top_y + pipes[i].gap_size) // check y
+                let passed = true; // used to check for transition out of pipe to add a point
+                // checking if current pipe has not been passed yet (to the right of the bird)
+                if (pipes[i].left_x + pipes[i].width > bird.left_x)
                 {
-                    hit_sound.play();
-                    paused = true;
-                    lost = true;
-                    console.log("Lost");
+                    passed = false
+                }
+
+                // move pipe (checking delta_time to avoid errors)
+                if (!isNaN(delta_time)) 
+                {
+                    pipes[i].left_x -= delta_time * PIPE_SPEED;
+                }
+
+                // check if after update pipe has now been passed (to the left of the bird) if it was not passed before the update
+                if (passed === false && pipes[i].left_x + pipes[i].width <  bird.left_x)
+                {
+                    if (ai_mode === 0)
+                    {
+                        point_sound.play();
+                    }                    
+                    points++;
+                    high_score = Math.max(high_score, points);
+                    // console.log(points);
+                }
+
+                // check for pipe collisions
+                if (pipes[i].left_x < bird.left_x + bird.width && pipes[i].left_x + pipes[i].width > bird.left_x) // check x
+                {
+                    if (bird.top_y < pipes[i].top_y || bird.top_y + bird.height > pipes[i].top_y + pipes[i].gap_size) // check y
+                    {
+                        hit_sound.play();
+                        paused = true;
+                        lost = true;
+                        console.log("Lost");
+                    }
+                }
+
+                // check if pipe is off screen if so remove it
+                if (pipes[i].left_x <= -PIPE_WIDTH)
+                {
+                    pipes.shift();
                 }
             }
 
-            // check if pipe is off screen if so remove it
-            if (pipes[i].left_x <= -PIPE_WIDTH)
+            // spawn new pipe after interval time
+            if (game_time >= last_spwan_time + interval)
             {
-                pipes.shift();
+                last_spwan_time = game_time;
+                interval = random(MIN_INTERVAL, MAX_INTERVAL);
+                let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
+                pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
+            }
+
+            // ground scroll
+            if (!isNaN(delta_time)) 
+            {
+                ground_pos -= delta_time * PIPE_SPEED;
+                ground_pos %= GAME_WIDTH;
+                background_pos -= (delta_time * BACKGROUND_SPEED);
+                background_pos %= GAME_WIDTH;
+            }
+
+            if (ai_mode === 1)
+            {
+                ai1();
+            }
+
+            if (lost)
+            {
+                break;
             }
         }
-
-        // spawn new pipe after interval time
-        if (game_time >= last_spwan_time + interval)
-        {
-            last_spwan_time = game_time;
-            interval = random(MIN_INTERVAL, MAX_INTERVAL);
-            let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
-            pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
-        }
-
-        // ground scroll
-        if (!isNaN(delta_time)) 
-        {
-            ground_pos -= delta_time * PIPE_SPEED;
-            ground_pos %= GAME_WIDTH;
-            background_pos -= (delta_time * BACKGROUND_SPEED);
-            background_pos %= GAME_WIDTH;
-        }
-
-        if (ai_mode === 1)
-        {
-            ai1();
-        }
     }
-
     setTimeout(
         function()
         {

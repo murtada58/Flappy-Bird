@@ -21,7 +21,6 @@ const BIRD_WIDTH = 70; // the width of the bird
 const BIRD_X = GAME_WIDTH * 0.25; // the birds x position
 const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 const GRAVITY = 2000; // the gravity strength pulling the bird down
-const FPS = 120; // the frames per second that the game runs on
 
 let sprites = [new Image(), new Image(), new Image()];
 //sprites.src = "./assets/one_eye_monster.png";
@@ -43,6 +42,7 @@ let background_pos = 0;
 
 let paused = true; // controls wether the game is paused or not
 let lost = true; // indicates wether the user has lost or not starts at true for simplicity
+let fps = 120; // the frames per second that the game runs on
 let time_factor = 1; // the factor of game time to real time so 2 means game time is twice as fast as realtime
 let timer = 0; // keeps track of time in seconds
 let interval = 2; // time between column spawns in seconds
@@ -88,11 +88,7 @@ function setup()
                 jump();
             });
     }
-
-    setInterval(function(){
-        draw(1 / FPS);
-    }, 1000 / FPS);
-    
+    draw(1 / fps);
 }
 
 // physics update
@@ -177,9 +173,9 @@ function update(delta_time)
 
 // draw update
 //let old_times_stamp = 0;
-function draw(time_stamp)
+function draw(dt)
 {
-    let delta_time = time_stamp * time_factor;
+    let delta_time = dt * time_factor;
     //let delta_time = ((time_stamp - old_times_stamp) / 1000) * time_factor; // time between frames in seconds
     //old_times_stamp = time_stamp;
     if (!lost && !paused && !isNaN(delta_time))
@@ -208,6 +204,11 @@ function draw(time_stamp)
     // draw stats
     draw_stats(GAME_WIDTH, GAME_HEIGHT, canvas.width, canvas.height, timer, points, high_score);
 
+    setTimeout(
+        function()
+        {
+            draw(1 / fps)
+        }, 1000 / fps)
     //window.requestAnimationFrame(draw);
 }
 

@@ -42,6 +42,7 @@ let background_pos = 0;
 
 let paused = true; // controls wether the game is paused or not
 let lost = true; // indicates wether the user has lost or not starts at true for simplicity
+let draw_hitbox = false;
 let fps = 120; // the frames per second that the game runs on
 let time_step = 10; // the timestep that the game runs on in ms, 4ms is the minimum for set timeout
 let ai_timestep_divider_value = 10000; // when in ai mode the timestep is divided by this value
@@ -171,7 +172,7 @@ function update(delta_time)
                 last_spwan_time = game_time;
                 interval = random(MIN_INTERVAL, MAX_INTERVAL);
                 let pipe_gap = randomInt(MIN_PIPE_GAP, MAX_PIPE_GAP);
-                pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH));
+                pipes.push(new Pipe(GAME_WIDTH, randomInt(GAME_HEIGHT * 0.1, (GAME_HEIGHT * 0.9) - pipe_gap), pipe_gap, PIPE_WIDTH, pipe_head, pipe_body));
             }
 
             // ground scroll
@@ -219,12 +220,12 @@ function draw(time_stamp)
     // animate bird
     bird.animate(game_time);
     // draw bird
-    draw_bird(bird, "#FF0000");
+    bird.draw(canvas_context, draw_hitbox);
 
     // draw pipes
     for (let i = 0; i < pipes.length; i++)
     {
-        draw_pipe(pipes[i], GAME_HEIGHT, "#000000", pipe_head, pipe_body);
+        pipes[i].draw(canvas_context, GAME_HEIGHT, draw_hitbox);
     }
 
     // draw ground

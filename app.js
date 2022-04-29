@@ -1,7 +1,7 @@
 "use strict";
 
-let canvas = document.getElementById('flappy_bird');
-let canvas_context = canvas.getContext('2d');
+const canvas = document.getElementById("game");
+const canvasContext = canvas.getContext("2d");
 
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
@@ -21,6 +21,7 @@ const BIRD_WIDTH = 70; // the width of the bird
 const BIRD_X = GAME_WIDTH * 0.25; // the birds x position
 const BIRD_JUMP = -500; // the y speed the bird is set to when jumping
 const GRAVITY = 2000; // the gravity strength pulling the bird down
+const AI_TIME_DIVIDER = 10000; // when in ai mode the timestep is divided by this value
 
 let sprites = [new Image(), new Image(), new Image()];
 //sprites.src = "./assets/one_eye_monster.png";
@@ -45,23 +46,24 @@ let lost = true; // indicates wether the user has lost or not starts at true for
 let draw_hitbox = false;
 let fps = 120; // the frames per second that the game runs on
 let time_step = 10; // the timestep that the game runs on in ms, 4ms is the minimum for set timeout
-let ai_timestep_divider_value = 10000; // when in ai mode the timestep is divided by this value
 let time_factor = 1; // the factor of game time to real time so 2 means game time is twice as fast as realtime
 let game_time = 0; // keeps track of game time in seconds
 let real_time = 0; // keeps track of the real life time in seconds
 let interval = 2; // time between column spawns in seconds
 let last_spwan_time = 0; // the time that the last column was spawned in seconds
 let pipes = []; // contains all of the pipes
-let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0, sprites);
+let bird = new Bird(BIRD_WIDTH, BIRD_HEIGHT, BIRD_X, (GAME_HEIGHT / 2) - (BIRD_HEIGHT / 2), BIRD_JUMP, 0, sprites, GAME_HEIGHT);
 let points = 0;
 let high_score = 0;
-let ai_mode = 0; // 0 is manual
 let hit_sound = new Sound("./assets/sfx_hit.wav");
 let point_sound = new Sound("./assets/sfx_point.wav");
 let wing_sound = new Sound("./assets/sfx_wing.wav");
 let background_music = new Sound("./assets/background_music.mp3");
 
+let aiController = null;
+
 // intial setup
+
 function setup()
 {
     document.addEventListener("keydown", keyPressed);
@@ -73,7 +75,7 @@ function setup()
     background_music.mute();
     point_sound.mute();
 
-    let isTouchDevice = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+    const isTouchDevice = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
     if (isTouchDevice)
     {
         canvas.addEventListener("touchstart", 
@@ -105,13 +107,17 @@ function update(delta_time)
 {
     if (!lost && !paused)
     {
-        let ai_timestep_divider = (ai_timestep_divider_value * (ai_mode !== 0)) + (1 * (ai_mode === 0)); // dividies the timestep if in ai mode to allow the game to run more accuratley
-        delta_time /= ai_timestep_divider;
-        for (let i = 0; i < ai_timestep_divider; i++)
+        let timestep_divider = 1;
+        if (aiController) {
+            timestep_divider = AI_TIME_DIVIDER; // dividies the timestep if in ai mode to allow the game to run more accuratley
+        }
+        
+        delta_time /= timestep_divider;
+        for (let i = 0; i < timestep_divider; i++)
         {
             game_time += delta_time;
-            bird.apply_gravity(GRAVITY, delta_time);
-            lost = bird.update_position(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
+            bird.applyGravity(GRAVITY, delta_time);
+            lost = bird.updatePosition(GAME_HEIGHT, delta_time); // update position returns wether touching bottom or not
 
             if (lost)
             {
@@ -186,7 +192,7 @@ function update(delta_time)
 
             if (ai_mode === 1)
             {
-                ai1();
+                aiController.update(bird, pipes);
             }
 
             if (lost)
@@ -220,12 +226,12 @@ function draw(time_stamp)
     // animate bird
     bird.animate(game_time);
     // draw bird
-    bird.draw(canvas_context, draw_hitbox);
+    bird.draw(canvasContext, draw_hitbox);
 
     // draw pipes
     for (let i = 0; i < pipes.length; i++)
     {
-        pipes[i].draw(canvas_context, GAME_HEIGHT, draw_hitbox);
+        pipes[i].draw(canvasContext, GAME_HEIGHT, draw_hitbox);
     }
 
     // draw ground
@@ -255,28 +261,6 @@ function start()
     bird.top_y = (GAME_HEIGHT / 2) - (bird.height / 2);
     bird.current_speed = 0;
     bird.time = 0;
-}
-
-// simple flappy bird ai
-function ai1()
-{
-    let current_pipe_found = false;
-    for (let i = 0; i < pipes.length; i++)
-    {
-        if (pipes[i].left_x + pipes[i].width >= bird.left_x && !current_pipe_found)
-        {
-            current_pipe_found = true;
-            if (bird.top_y >= pipes[i].top_y + pipes[i].gap_size - (bird.height + 10))
-            {
-                bird.jump();
-            }
-        }
-    }
-
-    if (bird.top_y >= GAME_HEIGHT / 2 && !current_pipe_found)
-    {
-        bird.jump();
-    }
 }
 
 // keyboard input
@@ -378,14 +362,14 @@ function keyPressed(evt)
         case 48:
             if (!zero_key_down)
             {
-                ai_mode = 0;
+                aiController = null;
                 zero_key_down = true;
             }
             break;
         case 49:
             if (!one_key_down)
             {
-                ai_mode = 1;
+                aiController = new AiController();
                 one_key_down = true;
             }
             break;
@@ -395,7 +379,7 @@ function keyPressed(evt)
 function jump()
 {
     background_music.play();
-    if (!lost && !paused && ai_mode === 0)
+    if (!lost && !paused && !aiController)
     {  
         // wing_sound.play();
         bird.jump();
